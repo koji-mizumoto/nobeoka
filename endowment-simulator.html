@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Endowment Investment Simulator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <style>
@@ -48,18 +50,19 @@
         }
         .chart-container {
             position: relative;
-            height: 800px;
+            height: auto;
             margin-top: 20px;
             margin-bottom: 20px;
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(2, 1fr);
             gap: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 400px);
         }
         .chart-wrapper {
             position: relative;
             width: 100%;
             height: 100%;
+            min-height: 300px;
         }
         .results {
             display: grid;
@@ -81,6 +84,25 @@
         .slider-container label span {
             font-weight: bold;
             margin-left: 10px;
+        }
+        /* スマートフォン表示 (768px未満) */
+        @media screen and (max-width: 767px) {
+            .chart-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, 300px);
+            }
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            .simulator-container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .control-group h3 {
+                font-size: 1.2em;
+            }
         }
     </style>
 </head>
@@ -282,7 +304,7 @@
                 r.withdrawal > 0 ? r.withdrawal / params.studentCount : 0
             );
 
-            // 既存のチャートを破棄
+            // 既のチャートを破棄
             if (capitalChart) {
                 capitalChart.destroy();
             }
