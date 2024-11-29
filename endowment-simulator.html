@@ -48,11 +48,12 @@
         }
         .chart-container {
             position: relative;
-            height: 400px;
+            height: 800px;
             margin-top: 20px;
             margin-bottom: 20px;
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
             gap: 20px;
         }
         .chart-wrapper {
@@ -99,11 +100,27 @@
                     </div>
                 </div>
                 <div class="slider-container">
+                    <label for="annualContribution">毎年の追加投資額 (億円) <span id="annualContributionValue">1億円</span></label>
+                    <input type="range" id="annualContribution" min="0" max="10" value="1" step="0.1">
+                    <div class="slider-info">
+                        <span>0億円</span>
+                        <span>10億円</span>
+                    </div>
+                </div>
+                <div class="slider-container">
                     <label for="years">シミュレーション期間 (年) <span id="yearsValue">10年</span></label>
                     <input type="range" id="years" min="5" max="30" value="10" step="1">
                     <div class="slider-info">
                         <span>5年</span>
                         <span>30年</span>
+                    </div>
+                </div>
+                <div class="slider-container">
+                    <label for="studentCount">1学年生徒数 (人) <span id="studentCountValue">40人</span></label>
+                    <input type="range" id="studentCount" min="10" max="200" value="40" step="5">
+                    <div class="slider-info">
+                        <span>10人</span>
+                        <span>200人</span>
                     </div>
                 </div>
             </div>
@@ -112,10 +129,10 @@
                 <h3>リターンとコスト</h3>
                 <div class="slider-container">
                     <label for="expectedReturn">期待収益率 (%) <span id="expectedReturnValue">5.0%</span></label>
-                    <input type="range" id="expectedReturn" min="0" max="10" value="5" step="0.1">
+                    <input type="range" id="expectedReturn" min="0" max="20" value="5" step="0.1">
                     <div class="slider-info">
                         <span>0%</span>
-                        <span>10%</span>
+                        <span>20%</span>
                     </div>
                 </div>
                 <div class="slider-container">
@@ -159,6 +176,9 @@
             <div class="chart-wrapper">
                 <canvas id="costChart"></canvas>
             </div>
+            <div class="chart-wrapper">
+                <canvas id="perStudentChart"></canvas>
+            </div>
         </div>
 
         <div class="results">
@@ -181,6 +201,7 @@
         let capitalChart;
         let withdrawalChart;
         let costChart;
+        let perStudentChart;
 
         function formatCurrency(value) {
             return new Intl.NumberFormat('ja-JP', {
@@ -213,8 +234,8 @@
                 totalWithdrawal += withdrawal;
                 totalFees += fees;
                 
-                // 資本の更新
-                capital = capital + investmentReturn - fees - withdrawal;
+                // 資本の更新（運用益 - コスト - 取崩 + 追加投資額）
+                capital = capital + investmentReturn - fees - withdrawal + params.annualContribution;
                 
                 results.push({
                     year,
@@ -235,11 +256,13 @@
         function updateChart() {
             const params = {
                 initialCapital: parseFloat(document.getElementById('initialCapital').value) * 100000000,
+                annualContribution: parseFloat(document.getElementById('annualContribution').value) * 100000000,
                 years: parseInt(document.getElementById('years').value),
                 expectedReturn: parseFloat(document.getElementById('expectedReturn').value) / 100,
                 managementFee: parseFloat(document.getElementById('managementFee').value) / 100,
                 custodianFee: parseFloat(document.getElementById('custodianFee').value) / 100,
-                withdrawalRate: parseFloat(document.getElementById('withdrawalRate').value) / 100
+                withdrawalRate: parseFloat(document.getElementById('withdrawalRate').value) / 100,
+                studentCount: parseInt(document.getElementById('studentCount').value) * 3
             };
 
             const simulation = simulateEndowment(params);
@@ -255,6 +278,9 @@
             const withdrawals = simulation.results.map(r => r.withdrawal);
             const managementFees = simulation.results.map(r => r.capital * params.managementFee);
             const custodianFees = simulation.results.map(r => r.capital * params.custodianFee);
+            const perStudentSupport = simulation.results.map(r => 
+                r.withdrawal > 0 ? r.withdrawal / params.studentCount : 0
+            );
 
             // 既存のチャートを破棄
             if (capitalChart) {
@@ -265,6 +291,9 @@
             }
             if (costChart) {
                 costChart.destroy();
+            }
+            if (perStudentChart) {
+                perStudentChart.destroy();
             }
 
             // 運用残高のグラフ
@@ -400,6 +429,49 @@
                     }
                 }
             });
+
+            // 生徒1人あたり活動補助費のグラフ
+            const ctxPerStudent = document.getElementById('perStudentChart').getContext('2d');
+            perStudentChart = new Chart(ctxPerStudent, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: '生徒1人あたり活動補助費',
+                        data: perStudentSupport,
+                        borderColor: 'rgb(54, 162, 235)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return (value / 10000).toFixed(0) + '万円';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '生徒1人あたり活動補助費推移'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + 
+                                           (context.parsed.y / 10000).toFixed(0) + '万円';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         // Update value displays
@@ -412,8 +484,14 @@
                 case 'initialCapital':
                     valueDisplay.textContent = `${value}億円`;
                     break;
+                case 'annualContribution':
+                    valueDisplay.textContent = `${value}億円`;
+                    break;
                 case 'years':
                     valueDisplay.textContent = `${value}年`;
+                    break;
+                case 'studentCount':
+                    valueDisplay.textContent = `${value}人`;
                     break;
                 case 'expectedReturn':
                 case 'managementFee':
