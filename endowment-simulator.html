@@ -85,6 +85,11 @@
             font-weight: bold;
             margin-left: 10px;
         }
+        @media screen and (min-width: 768px) {
+            .sp-br {
+                display: none;
+            }
+        }
         /* スマートフォン表示 (768px未満) */
         @media screen and (max-width: 767px) {
             .chart-container {
@@ -104,11 +109,13 @@
                 font-size: 1.2em;
             }
         }
+
+        
     </style>
 </head>
 <body>
     <div class="simulator-container">
-        <h1>エンダウメント投資シミュレーター</h1>
+        <h1>エンダウメント投資<br class="sp-br">シミュレーター</h1>
         
         <div class="controls">
             <div class="control-group">
