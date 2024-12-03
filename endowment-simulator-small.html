@@ -389,7 +389,7 @@
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
-                                    return (value / 10000).toFixed(0) + '万円';
+                                    return (value / 100000000).toFixed(2) + '億円';
                                 }
                             }
                         }
@@ -403,7 +403,7 @@
                             callbacks: {
                                 label: function(context) {
                                     return context.dataset.label + ': ' + 
-                                           (context.parsed.y / 10000).toFixed(0) + '万円';
+                                           (context.parsed.y / 100000000).toFixed(2) + '億円';
                                 }
                             }
                         }
