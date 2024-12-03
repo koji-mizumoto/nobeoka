@@ -121,19 +121,19 @@
             <div class="control-group">
                 <h3>基本設定</h3>
                 <div class="slider-container">
-                    <label for="initialCapital">初期投資額 (億円) <span id="initialCapitalValue">50億円</span></label>
-                    <input type="range" id="initialCapital" min="10" max="500" value="50" step="10">
+                    <label for="initialCapital">初期投資額 (億円) <span id="initialCapitalValue">10億円</span></label>
+                    <input type="range" id="initialCapital" min="1" max="100" value="10" step="1">
                     <div class="slider-info">
-                        <span>10億円</span>
-                        <span>500億円</span>
+                        <span>1億円</span>
+                        <span>100億円</span>
                     </div>
                 </div>
                 <div class="slider-container">
-                    <label for="annualContribution">毎年の追加投資額 (億円) <span id="annualContributionValue">10億円</span></label>
-                    <input type="range" id="annualContribution" min="0" max="100" value="10" step="10">
+                    <label for="annualContribution">毎年の追加投資額 (億円) <span id="annualContributionValue">1億円</span></label>
+                    <input type="range" id="annualContribution" min="0" max="10" value="1" step="0.1">
                     <div class="slider-info">
                         <span>0億円</span>
-                        <span>100億円</span>
+                        <span>10億円</span>
                     </div>
                 </div>
                 <div class="slider-container">
@@ -389,7 +389,7 @@
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
-                                    return (value / 100000000).toFixed(1) + '億円';
+                                    return (value / 10000).toFixed(0) + '万円';
                                 }
                             }
                         }
@@ -403,7 +403,7 @@
                             callbacks: {
                                 label: function(context) {
                                     return context.dataset.label + ': ' + 
-                                           (context.parsed.y / 100000000).toFixed(1) + '億円';
+                                           (context.parsed.y / 10000).toFixed(0) + '万円';
                                 }
                             }
                         }
